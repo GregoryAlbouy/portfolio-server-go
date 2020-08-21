@@ -1,2 +1,7 @@
+# env files
 /env.go
 .env
+
+# gcloud
+/.gcloudignore
+/app.yaml
