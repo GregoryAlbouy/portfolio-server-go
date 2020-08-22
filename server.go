@@ -15,7 +15,7 @@ type server struct {
 
 func newServer() *server {
 	s := server{
-		router: mux.NewRouter(),
+		router: mux.NewRouter().StrictSlash(true),
 	}
 
 	s.routes()

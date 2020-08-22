@@ -28,7 +28,7 @@ type Store interface {
 	Open() error
 	Close() error
 
-	GetProjects() ([]*Project, error)
+	GetProjectList() (ProjectList, error)
 	GetProjectBySlug(string) (*Project, error)
 	CreateProject(*Project) error
 	Clear() error
@@ -57,15 +57,26 @@ func (store *dbStore) Close() error {
 	return store.db.Close()
 }
 
-func (store *dbStore) GetProjects() ([]*Project, error) {
-	var pjs []*Project
-	err := store.db.Select(&pjs, "SELECT * FROM project ORDER BY added_on DESC")
-	return pjs, err
+func (store *dbStore) GetProjectList() (pl ProjectList, err error) {
+	err = store.db.Select(&pl, "SELECT * FROM project ORDER BY added_on DESC")
+	return
 }
 
 func (store *dbStore) GetProjectBySlug(slug string) (*Project, error) {
 	var res []*Project
 	err := store.db.Select(&res, fmt.Sprintf("SELECT * FROM project WHERE slug='%s' LIMIT 1", slug))
+	if err != nil {
+		return nil, err
+	}
+	if len(res) == 0 {
+		return nil, nil
+	}
+	return res[0], nil
+}
+
+func (store *dbStore) GetProjectByID(id int64) (*Project, error) {
+	var res []*Project
+	err := store.db.Select(&res, fmt.Sprintf("SELECT * FROM project WHERE id='%d' LIMIT 1", id))
 	if err != nil {
 		return nil, err
 	}

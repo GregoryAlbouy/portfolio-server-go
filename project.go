@@ -7,19 +7,30 @@ import (
 	"time"
 )
 
+// ProjectList struct
+type ProjectList []*Project
+
+func (pl ProjectList) toJSON() *ProjectList {
+	for _, p := range pl {
+		p.toJSON()
+		fmt.Println(p)
+	}
+	return &pl
+}
+
 // Project struct
 type Project struct {
-	ID          int64   `db:"id"`
-	Name        string  `db:"name"`
-	Slug        string  `db:"slug"`
-	Description string  `db:"description"`
-	Tags        Taglist `db:"-"`
-	TagStr      string  `db:"tags"`
-	Image       string  `db:"image"`
-	Repo        string  `db:"repo"`
-	Demo        string  `db:"demo"`
-	AddedOn     int64   `db:"added_on"`
-	EditedOn    int64   `db:"edited_on"`
+	ID          int64   `db:"id" json:"id"`
+	Name        string  `db:"name" json:"name"`
+	Slug        string  `db:"slug" json:"slug"`
+	Description string  `db:"description" json:"description"`
+	Tags        Taglist `db:"-" json:"tags"`
+	TagStr      string  `db:"tags" json:"-"`
+	Image       string  `db:"image" json:"image,omitempty"`
+	Repo        string  `db:"repo" json:"repo,omitempty"`
+	Demo        string  `db:"demo" json:"demo,omitempty"`
+	AddedOn     int64   `db:"added_on" json:"added_on"`
+	EditedOn    int64   `db:"edited_on" json:"edited_on,omitempty"`
 }
 
 // Taglist type is a slice of strings that prints by joining them with a comma
@@ -67,6 +78,16 @@ func (p *Project) Update() {
 	p.EditedOn = timestamp()
 }
 
+// SetTagStr sets TagStr field from Tags value
+func (p *Project) setTagStr() {
+	p.TagStr = strings.Join(p.Tags, ",")
+}
+
+// SetTags sets Tags fields from TagStr value (string with comma-separated values)
+func (p *Project) setTags() {
+	p.Tags = strings.Split(p.TagStr, ",")
+}
+
 // IsValidForInsertion checks whether a project contains the required fields
 func (p *Project) IsValidForInsertion() bool {
 	return p.Name != "" && p.Slug != "" && p.Description != ""
@@ -77,8 +98,16 @@ func (p *Project) IsValidForInsertion() bool {
 // }
 
 // func (p *Project) alreadyInDB() bool {
-// 	return len()
+// 	return false
 // }
+
+func (p *Project) toJSON() {
+	p.setTags()
+}
+
+func (p *Project) toDB() {
+	p.setTagStr()
+}
 
 func (p Project) String() string {
 	j, err := json.MarshalIndent(p, "", "    ")

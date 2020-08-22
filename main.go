@@ -7,6 +7,10 @@ import (
 	"os"
 )
 
+const (
+	defaultPort = "8080"
+)
+
 // func tests(srv *server) {
 // 	p1 := Project{
 // 		Name:        "Codemon",
@@ -76,22 +80,32 @@ func main() {
 }
 
 func run() (err error) {
+	// init server
 	srv := newServer()
 	srv.store = &dbStore{}
 
+	// init store
 	err = srv.store.Open()
 	if err != nil {
 		return
 	}
 	defer srv.store.Close()
 
+	// init routes
 	http.HandleFunc("/", srv.serveHTTP)
 
-	err = http.ListenAndServe(":8080", nil)
+	// serve
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = defaultPort
+	}
+	addr := ":" + port
+	err = http.ListenAndServe(addr, nil)
 	if err != nil {
 		return
 	}
 
-	// tests(srv)
+	fmt.Println("Listening to port " + port)
+
 	return
 }
