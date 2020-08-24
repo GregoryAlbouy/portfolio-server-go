@@ -5,3 +5,6 @@
 # gcloud
 /.gcloudignore
 /app.yaml
+
+# DB
+*.db

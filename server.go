@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -14,8 +15,16 @@ type server struct {
 }
 
 func newServer() *server {
+	r := mux.NewRouter().StrictSlash(true)
+
+	r.Use(handlers.CORS(
+		handlers.AllowedHeaders([]string{"content-type"}),
+		handlers.AllowedOrigins([]string{"*"}),
+		handlers.AllowCredentials(),
+	))
+
 	s := server{
-		router: mux.NewRouter().StrictSlash(true),
+		router: r,
 	}
 
 	s.routes()
@@ -41,4 +50,8 @@ func (s *server) respond(w http.ResponseWriter, _ *http.Request, data interface{
 	}
 
 	w.Write(resp)
+}
+
+func (s *server) decode(w http.ResponseWriter, r *http.Request, v interface{}) error {
+	return json.NewDecoder(r.Body).Decode(v)
 }

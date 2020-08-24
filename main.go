@@ -17,13 +17,12 @@ const (
 // 		Slug:        "codemon",
 // 		Description: "School project",
 // 		Repo:        "https://github.com/gregoryalbouy/codemon",
-// 		Tags: Taglist{
+// 		Tags: []string{
 // 			"OO JS",
 // 			"ES6",
 // 			"JS Modules",
 // 			"3D CSS Animation",
 // 		},
-// 		// Tags: NewTaglist("Node.js,Golang,Python"),
 // 	}
 // 	p1.Init()
 

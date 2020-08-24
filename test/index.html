@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <style>
+        label,
+        input,
+        textarea {
+            display: block;
+        }
+    </style>
+    <form id="form">
+        <label>
+            name
+            <input type="text" name="name" value="Test project">
+        </label>
+        <label>
+            slug
+            <input type="text" name="slug" value="test-project">
+        </label>
+        <label>
+            description
+            <textarea name="description" value="Some test project (value)">Some test project</textarea>
+        </label>
+        <label>
+            image
+            <input type="text" name="image" value="https://image.jpg">
+        </label>
+        <label>
+            repo
+            <input type="text" name="repo" value="https://repo.git">
+        </label>
+        <label>
+            demo
+            <input type="text" name="demo" value="https://demo.com">
+        </label>
+        <label>
+            tags
+            <input type="text" name="tags" value="tag1,tag2,tag3">
+        </label>
+        <label>
+            hidden
+            <input type="checkbox" name="is_hidden">
+        </label>
+        <input id="submit" type="submit" value="submit">
+    </form>
+    <pre id="result"></pre>
+    <script src="./create.js"></script>
+</body>
+</html>
