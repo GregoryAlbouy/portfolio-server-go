@@ -13,10 +13,14 @@ const handleClick = (event) => {
 }
 
 const submit = async (form) => {
-    const response = await post(form)
-    const responseData = await response.json()
-    id('result').innerHTML = JSON.stringify(responseData).split(',').join('\n')
-    console.log(form.getAll('description'))
+    try {
+        const response = await post(form)
+        const responseData = await response.json()
+        id('result').innerHTML = JSON.stringify(responseData).split(',').join('\n')
+        console.log(form.getAll('description'))
+    } catch(e) {
+        console.log(e)
+    }
 }
 
 const post = async (project) => {

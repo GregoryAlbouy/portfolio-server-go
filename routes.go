@@ -2,25 +2,25 @@ package main
 
 import (
 	"net/http"
-
-	"github.com/gorilla/mux"
 )
 
-// ServerRoute struct
-type ServerRoute struct {
+// RouteConfig struct
+type RouteConfig struct {
 	path    string
-	handler http.HandlerFunc
 	method  string
+	handler http.HandlerFunc
 }
 
 func (s *server) routes() {
 	s.router.HandleFunc("/", s.handleIndex()).Methods("GET")
-	s.projectRoutes()
+	s.handleProjectRoutes()
+	// s.handleContactRoutes()
 }
 
-func (s *server) projectRoutes() {
+func (s *server) handleProjectRoutes() {
 	sub := s.router.PathPrefix("/api/v1/projects").Subrouter()
-	projectRoutes := []ServerRoute{
+
+	projectRoutes := []RouteConfig{
 		{path: "/", method: "GET", handler: s.readProjectList()},
 		{path: "/", method: "POST", handler: s.createProject()},
 		{path: "/{id}", method: "GET", handler: s.readProject()},
@@ -32,16 +32,26 @@ func (s *server) projectRoutes() {
 		sub.HandleFunc(r.path, r.handler).Methods(r.method)
 	}
 }
-func (s *server) contactRoutes() {
 
+// TODO: handlers
+func (s *server) handleContactRoutes() {
+	sub := s.router.PathPrefix("/contact").Subrouter()
+
+	contactRoutes := []RouteConfig{
+		{path: "/", method: "GET", handler: nil},
+		{path: "/{id}", method: "POST", handler: nil},
+		{path: "/{id}", method: "GET", handler: nil},
+		{path: "/{id}", method: "DELETE", handler: nil},
+	}
+
+	for _, r := range contactRoutes {
+		sub.HandleFunc(r.path, r.handler).Methods(r.method)
+	}
 }
 
-func (s *server) authRoutes() {
+func (s *server) handleAuthRoutes() {
 	ct := s.router.PathPrefix("/contact").Subrouter()
 	ct.HandleFunc("/", nil).Methods("GET")
 	ct.HandleFunc("/", nil).Methods("POST")
 	ct.HandleFunc("/{id}", nil).Methods("GET")
-}
-
-func (s *server) serveRoutes(router *mux.Router, routes []ServerRoute) {
 }

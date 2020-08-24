@@ -1,0 +1,1 @@
+SELECT * FROM project WHERE slug=? LIMIT 1
