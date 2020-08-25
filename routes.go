@@ -22,9 +22,9 @@ func (s *server) handleProjectRoutes() {
 	sub := s.router.PathPrefix("/api/v1/projects").Subrouter()
 
 	projectRoutes := []RouteConfig{
-		{path: "/", method: "GET", handler: s.readProjectList()},
+		{path: "/", method: "GET", handler: s.getProjectList()},
 		{path: "/", method: "POST", handler: s.auth(s.createProject())},
-		{path: "/{id}", method: "GET", handler: s.readProject()},
+		{path: "/{id}", method: "GET", handler: s.getProject()},
 		{path: "/{id}", method: "PUT", handler: s.updateProject()},
 		{path: "/{id}", method: "DELETE", handler: s.deleteProject()},
 	}
@@ -59,5 +59,11 @@ func (s *server) handleAuthRoutes() {
 
 	for _, r := range authRoutes {
 		sub.HandleFunc(r.path, r.handler).Methods(r.method)
+	}
+}
+
+func (s *server) handleIndex() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Welcome!"))
 	}
 }

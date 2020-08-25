@@ -9,12 +9,6 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-func (s *server) handleIndex() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Welcome!"))
-	}
-}
-
 func (s *server) createToken() http.HandlerFunc {
 	username := os.Getenv("AUTH_USERNAME")
 	password := os.Getenv("AUTH_PASSWORD")

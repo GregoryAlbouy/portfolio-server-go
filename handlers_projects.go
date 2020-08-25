@@ -10,7 +10,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func (s *server) readProjectList() http.HandlerFunc {
+func (s *server) getProjectList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		projects, err := s.store.GetProjectList()
 		if err != nil {
@@ -22,7 +22,7 @@ func (s *server) readProjectList() http.HandlerFunc {
 	}
 }
 
-func (s *server) readProject() http.HandlerFunc {
+func (s *server) getProject() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		slug := mux.Vars(r)["id"]
 		resp, err := s.store.GetProjectBySlug(slug)
