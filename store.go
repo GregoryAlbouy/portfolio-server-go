@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -59,7 +60,9 @@ func init() {
 
 func (store *dbStore) Open() error {
 	t0 := time.Now()
-	db, err := sqlx.Connect("sqlite3", ".db")
+
+	path := os.Getenv("DB_PATH")
+	db, err := sqlx.Connect("sqlite3", path)
 	if err != nil {
 		return err
 	}
@@ -114,7 +117,12 @@ func (store *dbStore) CreateProject(p *Project) error {
 		return fmt.Errorf("project %s already exists", p.Slug)
 	}
 
-	_, err := store.db.NamedExec(queries["project_insert"], p.formatSQL())
+	res, err := store.db.NamedExec(queries["project_insert"], p.formatSQL())
+	if err != nil {
+		return err
+	}
+
+	p.ID, err = res.LastInsertId()
 	if err != nil {
 		return err
 	}
