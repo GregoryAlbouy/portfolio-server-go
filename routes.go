@@ -14,6 +14,7 @@ type RouteConfig struct {
 func (s *server) routes() {
 	s.router.HandleFunc("/", s.handleIndex()).Methods("GET")
 	s.handleProjectRoutes()
+	s.handleAuthRoutes()
 	// s.handleContactRoutes()
 }
 
@@ -22,7 +23,7 @@ func (s *server) handleProjectRoutes() {
 
 	projectRoutes := []RouteConfig{
 		{path: "/", method: "GET", handler: s.readProjectList()},
-		{path: "/", method: "POST", handler: s.createProject()},
+		{path: "/", method: "POST", handler: s.auth(s.createProject())},
 		{path: "/{id}", method: "GET", handler: s.readProject()},
 		{path: "/{id}", method: "PUT", handler: s.updateProject()},
 		{path: "/{id}", method: "DELETE", handler: s.deleteProject()},
@@ -50,8 +51,13 @@ func (s *server) handleContactRoutes() {
 }
 
 func (s *server) handleAuthRoutes() {
-	ct := s.router.PathPrefix("/contact").Subrouter()
-	ct.HandleFunc("/", nil).Methods("GET")
-	ct.HandleFunc("/", nil).Methods("POST")
-	ct.HandleFunc("/{id}", nil).Methods("GET")
+	sub := s.router.PathPrefix("/auth").Subrouter()
+
+	authRoutes := []RouteConfig{
+		{path: "/", method: "POST", handler: s.createToken()},
+	}
+
+	for _, r := range authRoutes {
+		sub.HandleFunc(r.path, r.handler).Methods(r.method)
+	}
 }
