@@ -25,8 +25,8 @@ func (s *server) handleProjectRoutes() {
 		{path: "/", method: "GET", handler: s.getProjectList()},
 		{path: "/", method: "POST", handler: s.auth(s.createProject())},
 		{path: "/{id}", method: "GET", handler: s.getProject()},
-		{path: "/{id}", method: "PUT", handler: s.updateProject()},
-		{path: "/{id}", method: "DELETE", handler: s.deleteProject()},
+		{path: "/{id}", method: "PUT", handler: s.auth(s.updateProject())},
+		{path: "/{id}", method: "DELETE", handler: s.auth(s.deleteProject())},
 	}
 
 	for _, r := range projectRoutes {
