@@ -26,10 +26,6 @@ type testRequest struct {
 	body    io.Reader
 }
 
-var ct = map[string]string{
-	"json": "application/json",
-}
-
 var path = map[string]string{
 	"auth":    "/auth/",
 	"project": "/api/v1/projects/",
@@ -37,7 +33,6 @@ var path = map[string]string{
 
 var srv = newTestServer()
 var testProject = validProject()
-var w = httptest.NewRecorder()
 
 func (t testStore) Open() error {
 	return nil
@@ -89,7 +84,7 @@ func TestCreateProjectUnit(t *testing.T) {
 	fd, ctype, err := createFormData(testProject)
 	assert.Nil(t, err)
 
-	r := (&testRequest{
+	w, r := (&testRequest{
 		method: "POST",
 		target: path["project"],
 		headers: map[string]string{
@@ -107,13 +102,15 @@ func testAuthRoute(t *testing.T) {
 }
 
 func TestCreateProjectIntegration(t *testing.T) {
+	fmt.Println(validToken())
+
 	fd, ctype, err := createFormData(testProject)
 	assert.Nil(t, err)
 
 	token, err := validToken()
 	assert.Nil(t, err)
 
-	r := (&testRequest{
+	w, r := (&testRequest{
 		method: "POST",
 		target: path["project"],
 		headers: map[string]string{
@@ -140,27 +137,28 @@ func credentialsPayload() (io.Reader, error) {
 }
 
 func validToken() (string, error) {
-	const (
-		URL   = "http://localhost:8080/auth/"
-		ctype = "application/json"
-	)
+	payload, err := credentialsPayload()
+	if err != nil {
+		return "", err
+	}
 
 	type responseToken struct {
 		Token string `json:"token"`
 	}
 	var rt responseToken
 
-	payload, err := credentialsPayload()
-	if err != nil {
-		return "", err
-	}
+	w, r := (&testRequest{
+		method: "POST",
+		target: "/auth/",
+		headers: map[string]string{
+			"Content-Type": "application/json",
+		},
+		body: payload,
+	}).Set()
 
-	resp, err := http.Post(URL, ctype, payload)
-	if err != nil {
-		return "", err
-	}
+	srv.createToken()(w, r)
 
-	if err := json.NewDecoder(resp.Body).Decode(&rt); err != nil {
+	if err := json.NewDecoder(w.Body).Decode(&rt); err != nil {
 		return "", err
 	}
 
@@ -202,12 +200,15 @@ func validProject() map[string]string {
 	}
 }
 
-func (tr *testRequest) Set() *http.Request {
+// SetWR prepares a request from the *testRequest input and returns
+// a test writer and a *http.Request
+func (tr *testRequest) Set() (*httptest.ResponseRecorder, *http.Request) {
+	w := httptest.NewRecorder()
 	r := httptest.NewRequest(tr.method, tr.target, tr.body)
 
 	for k, v := range tr.headers {
 		r.Header.Set(k, v)
 	}
 
-	return r
+	return w, r
 }
