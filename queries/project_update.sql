@@ -9,4 +9,4 @@ SET
     demo=:demo,
     is_hidden=:is_hidden,
     edited_on=:edited_on
-WHERE id=:id
+WHERE id=:id;

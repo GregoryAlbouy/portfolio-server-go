@@ -11,4 +11,4 @@ CREATE TABLE IF NOT EXISTS project
 	is_hidden INTEGER,
 	added_on INTEGER,
 	edited_on INTEGER
-)
+);

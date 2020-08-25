@@ -1,1 +1,1 @@
-SELECT id FROM project WHERE id in (?)
+SELECT id FROM project WHERE id in (?);

@@ -1,1 +1,1 @@
-DELETE from project
+DELETE from project;

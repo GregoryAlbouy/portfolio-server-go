@@ -1,1 +1,1 @@
-SELECT * FROM project WHERE id=? LIMIT 1
+SELECT * FROM project WHERE id=? LIMIT 1;

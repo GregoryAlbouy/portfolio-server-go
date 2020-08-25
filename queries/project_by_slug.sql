@@ -1,1 +1,1 @@
-SELECT * FROM project WHERE slug=? LIMIT 1
+SELECT * FROM project WHERE slug=? LIMIT 1;

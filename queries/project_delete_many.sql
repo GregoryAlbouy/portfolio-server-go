@@ -1,1 +1,1 @@
-DELETE FROM project WHERE id IN (?)
+DELETE FROM project WHERE id IN (?);

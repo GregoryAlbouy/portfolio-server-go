@@ -1,1 +1,1 @@
-SELECT * FROM project ORDER BY added_on DESC
+SELECT * FROM project ORDER BY added_on DESC;
