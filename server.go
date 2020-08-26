@@ -28,8 +28,12 @@ func newServer() *server {
 	}
 
 	s.routes()
-
 	return &s
+}
+
+func (s *server) attachStore(store *dbStore) *server {
+	s.store = store
+	return s
 }
 
 func (s *server) respond(w http.ResponseWriter, _ *http.Request, data interface{}, status int) {
@@ -49,5 +53,8 @@ func (s *server) respond(w http.ResponseWriter, _ *http.Request, data interface{
 }
 
 func (s *server) decode(w http.ResponseWriter, r *http.Request, v interface{}) error {
-	return json.NewDecoder(r.Body).Decode(v)
+	if err := json.NewDecoder(r.Body).Decode(v); err != nil {
+		return fmt.Errorf("Cannot parse request body: %s", err)
+	}
+	return nil
 }

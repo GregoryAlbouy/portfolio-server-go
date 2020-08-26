@@ -1,11 +1,9 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
-	"time"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
@@ -15,8 +13,7 @@ import (
 
 var queries = map[string]string{
 	"table_project_create": "",
-	"table_project_clear":  "",
-	"table_project_drop":   "",
+	"table_user_create":    "",
 	"project_insert":       "",
 	"project_all":          "",
 	"project_ids":          "",
@@ -25,6 +22,10 @@ var queries = map[string]string{
 	"project_update":       "",
 	"project_delete":       "",
 	"project_delete_many":  "",
+	"user_all":             "",
+	"user_by_username":     "",
+	"user_delete":          "",
+	"user_insert":          "",
 }
 
 // Store interface
@@ -32,15 +33,22 @@ type Store interface {
 	Open() error
 	Close() error
 
+	Clear(string) error
+	Drop(string) error
+
 	GetProjectList() (ProjectList, error)
 	GetProjectByID(int64) (*Project, error)
 	GetProjectBySlug(string) (*Project, error)
 	UpdateProject(*Project) error
-	CreateProject(*Project) error
+	InsertProject(*Project) error
 	DeleteProject(int64) error
 	DeleteManyProjects([]int64) error
-	Clear() error
-	Drop() error
+
+	GetUserList() ([]*User, error)
+	InsertUser(*User) error
+	GetUserByUsername(string) (*User, error)
+	DeleteUser(int64) error
+	UserExists(*User) bool
 }
 
 type dbStore struct {
@@ -52,77 +60,86 @@ func init() {
 	for k := range queries {
 		query, err := ioutil.ReadFile(fmt.Sprintf("queries/%s.sql", k))
 		if err != nil {
-			clog.Fatallb(err, "STORE (init)")
+			clog.Fatallb(err, "STORE init()")
 		}
 		queries[k] = string(query)
 	}
 }
 
 func (store *dbStore) Open() error {
-	t0 := time.Now()
+	path := os.Getenv("APP_DB_PATH")
+	status := clog.Green("OK")
 
-	path := os.Getenv("DB_PATH")
 	db, err := sqlx.Connect("sqlite3", path)
 	if err != nil {
-		return err
+		status = clog.Red("Error")
 	}
-
-	db.MustExec(queries["table_project_create"])
 	store.db = db
+	store.createTables()
 
-	fmt.Printf("DB connection %s (%s)\n", clog.Green("OK"), time.Since(t0))
-	return nil
+	fmt.Printf("DB path %s status %s\n", clog.Blue("/"+path), status)
+	return err
 }
 
 func (store *dbStore) Close() error {
 	return store.db.Close()
 }
 
-func (store *dbStore) GetProjectList() (pl ProjectList, err error) {
-	if err := store.db.Select(&pl, queries["project_all"]); err != nil {
-		fmt.Println(err)
+func (store *dbStore) createTables() {
+	store.db.MustExec(queries["table_project_create"])
+	store.db.MustExec(queries["table_user_create"])
+}
+
+func (store *dbStore) Clear(table string) error {
+	query := fmt.Sprintf("DELETE FROM %s", table)
+	_, err := store.db.Exec(query)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Table %s cleared\n", table)
+
+	return nil
+}
+
+func (store *dbStore) Drop(table string) error {
+	query := fmt.Sprintf("DROP TABLE IF EXISTS %s", table)
+	_, err := store.db.Exec(query)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Table %s dropped\n", table)
+	return nil
+}
+
+func (store *dbStore) GetUserList() (ul []*User, err error) {
+	if err := store.db.Select(&ul, queries["user_all"]); err != nil {
 		return nil, err
 	}
 	return
 }
 
-func (store *dbStore) GetProjectByID(id int64) (*Project, error) {
-	p := Project{}
-	if err := store.db.QueryRowx(queries["project_by_id"], id).StructScan(&p); err != nil {
+func (store *dbStore) GetUserByUsername(username string) (*User, error) {
+	u := User{}
+	if err := store.db.QueryRowx(queries["user_by_username"], username).StructScan(&u); err != nil {
 		return nil, err
 	}
-	return &p, nil
+	if u.Username == "" {
+		return nil, fmt.Errorf("User %s does not exist", username)
+	}
+	return &u, nil
 }
 
-func (store *dbStore) GetProjectBySlug(slug string) (*Project, error) {
-	p := Project{}
-	if err := store.db.QueryRowx(queries["project_by_slug"], slug).StructScan(&p); err != nil {
-		return nil, err
-	}
-	return &p, nil
-}
-
-func (store *dbStore) UpdateProject(p *Project) error {
-	_, err := store.db.NamedExec(queries["project_update"], p.formatSQL())
-	if err != nil {
-		fmt.Println(queries["project_update"])
-		return err
+func (store *dbStore) InsertUser(u *User) error {
+	if store.UserExists(u) {
+		return fmt.Errorf("user %s already exists", u.Username)
 	}
 
-	return nil
-}
-
-func (store *dbStore) CreateProject(p *Project) error {
-	if store.projectExists(p) {
-		return fmt.Errorf("project %s already exists", p.Slug)
-	}
-
-	res, err := store.db.NamedExec(queries["project_insert"], p.formatSQL())
+	res, err := store.db.NamedExec(queries["user_insert"], u)
 	if err != nil {
 		return err
 	}
 
-	p.ID, err = res.LastInsertId()
+	u.ID, err = res.LastInsertId()
 	if err != nil {
 		return err
 	}
@@ -130,75 +147,16 @@ func (store *dbStore) CreateProject(p *Project) error {
 	return nil
 }
 
-func (store *dbStore) DeleteProject(id int64) error {
-	_, err := store.db.Exec(queries["project_delete"], id)
+// TODO: check if user exists first
+func (store *dbStore) DeleteUser(id int64) error {
+	_, err := store.db.Exec(queries["user_delete"], id)
 	if err != nil {
-		return errors.New("Project does not exist")
+		return fmt.Errorf("User with id %d does not exist", id)
 	}
 	return nil
 }
 
-func (store *dbStore) DeleteManyProjects(ids []int64) error {
-	ok, err := store.projectIdsExist(ids)
-	if err != nil {
-		return err
-	}
-	if !ok {
-		return errors.New("Project does not exist")
-	}
-
-	q, args, err := sqlx.In(queries["project_delete_many"], ids)
-	if err != nil {
-		return errors.New("Internal error")
-	}
-
-	q = store.db.Rebind(q)
-	_, err = store.db.Exec(q, args...)
-	if err != nil {
-		return errors.New("Internal error")
-	}
-
-	return nil
-}
-
-func (store *dbStore) Clear() error {
-	_, err := store.db.Exec(queries["table_project_clear"])
-	if err != nil {
-		return err
-	}
-	fmt.Println("Table project cleared")
-
-	return nil
-}
-
-func (store *dbStore) Drop() error {
-	_, err := store.db.Exec(queries["table_project_drop"])
-	if err != nil {
-		return err
-	}
-	fmt.Println("Table project dropped")
-	return nil
-}
-
-func (store *dbStore) projectExists(p *Project) bool {
-	pj, _ := store.GetProjectBySlug(p.Slug)
-	return pj != nil
-}
-
-func (store *dbStore) projectIdsExist(ids []int64) (bool, error) {
-	pIds := []int64{}
-
-	q, args, err := sqlx.In(queries["project_ids"], ids)
-	if err != nil {
-		return false, errors.New("Internal error")
-	}
-
-	q = store.db.Rebind(q)
-	err = store.db.Select(&pIds, q, args...)
-	if err != nil {
-		fmt.Println(err)
-		return false, errors.New("Internal error")
-	}
-
-	return len(ids) == len(pIds), nil
+func (store *dbStore) UserExists(u *User) bool {
+	user, _ := store.GetUserByUsername(u.Username)
+	return user != nil
 }

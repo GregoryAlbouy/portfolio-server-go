@@ -49,7 +49,7 @@ func (s *server) createProject() http.HandlerFunc {
 			return
 		}
 
-		if err := s.store.CreateProject(p); err != nil {
+		if err := s.store.InsertProject(p); err != nil {
 			s.respond(w, r, fmt.Sprint(err), http.StatusBadRequest)
 			return
 		}
@@ -121,11 +121,5 @@ func (s *server) deleteProject() http.HandlerFunc {
 		}
 
 		s.respond(w, r, "Project deletion successful", http.StatusOK)
-	}
-}
-
-func (s *server) deleteManyProjects() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-
 	}
 }

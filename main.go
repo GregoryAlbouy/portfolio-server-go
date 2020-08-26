@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
 const (
@@ -19,9 +20,12 @@ func main() {
 }
 
 func run() (err error) {
+	start := time.Now()
+	// display env
+	fmt.Println("Environment", clog.Blue(os.Getenv("APP_ENV")))
+
 	// server
-	srv := newServer()
-	srv.store = &dbStore{}
+	srv := newServer().attachStore(&dbStore{})
 	port := port()
 	addr := ":" + port
 
@@ -30,6 +34,8 @@ func run() (err error) {
 		return
 	}
 	defer srv.store.Close()
+
+	fmt.Printf("%s (%s) http://127.0.0.1%s \n", clog.Green("Ready"), time.Since(start), addr)
 
 	// serve
 	if err = http.ListenAndServe(addr, srv.router); err != nil {
@@ -44,7 +50,7 @@ func port() string {
 	if port == "" {
 		port = defaultPort
 	}
+	fmt.Println("Port", clog.Blue(port))
 
-	fmt.Printf("Listening to port %s\n", clog.Blue(port))
 	return port
 }
