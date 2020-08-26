@@ -4,8 +4,8 @@ Backend-server for my portfolio https://gregoryalbouy.com written in Go + SQL (p
 
 It is functionnal and deployed on Google App Engine. I use it to access, store and manage project information using JWT authentication, and receive messages from the contact form – which is quite unlikely to happen.
 
-Portfolio : https://gregoryalbouy.com
-Front repo : https://github.com/gregoryalbouy/portfolio-wcf-2020
+* Portfolio : https://gregoryalbouy.com
+* Front repo : https://github.com/gregoryalbouy/portfolio-wcf-2020
 
 ## Storage
 
