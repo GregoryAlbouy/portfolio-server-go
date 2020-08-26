@@ -9,4 +9,4 @@ Front repo : https://github.com/gregoryalbouy/portfolio-wcf-2020
 
 ## Storage
 
-I use SQLite for dynamic storage because an embedded solution suits well my usage, though SQL language is not my favorite to work with. I wasn't aware until late of MongoDB equivalents such as [NeDB](https://github.com/louischatriot/nedb), so I might switch to it in the future.
+I use SQLite for dynamic storage because an embedded solution suits well my usage, though SQL language is not my favorite to work with. I might switch to a more mongo-ish solution if I find a satisfying one.
