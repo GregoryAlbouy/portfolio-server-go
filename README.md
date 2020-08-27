@@ -4,9 +4,6 @@ Backend-server for my portfolio https://gregoryalbouy.com written in Go + SQL (p
 
 It is functionnal and deployed on Google App Engine. I use it to access, store and manage project information using JWT authentication, and receive messages from the contact form – which is quite unlikely to happen.
 
-* Portfolio : https://gregoryalbouy.com
-* Front repo : https://github.com/gregoryalbouy/portfolio-wcf-2020
-
 ## Features
 
 - REST API providing CRUD operations on projects data
@@ -16,3 +13,8 @@ It is functionnal and deployed on Google App Engine. I use it to access, store a
 ## Storage
 
 I use SQLite for dynamic storage because an embedded solution suits well my usage, though SQL language is not my favorite to work with. I might switch to a more mongo-ish solution if I find a satisfying one.
+
+## See also
+
+* Portfolio website : https://gregoryalbouy.com
+* Portfolio front repo : https://github.com/gregoryalbouy/portfolio-wcf-2020
