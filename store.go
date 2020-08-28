@@ -79,10 +79,12 @@ func (store *dbStore) Open() error {
 
 	db, err := sqlx.Connect("sqlite3", path)
 	if err != nil {
+		clog.Printlb(err, clog.Red("DB CONNECTION ERROR"))
 		status = clog.Red("Error")
+	} else {
+		store.db = db
+		store.createTables()
 	}
-	store.db = db
-	store.createTables()
 
 	fmt.Printf("DB path %s status %s\n", clog.Blue("/"+path), status)
 	return err
