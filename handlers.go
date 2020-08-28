@@ -91,7 +91,6 @@ func (s *server) getUserList() http.HandlerFunc {
 	}
 }
 
-// TODO: BCRYPT
 func (s *server) createToken() http.HandlerFunc {
 	type response struct {
 		Token string `json:"token"`
