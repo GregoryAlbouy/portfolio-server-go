@@ -26,14 +26,10 @@ func (s *server) authOnly(next http.HandlerFunc) http.HandlerFunc {
 // APP_ENV is not set to "admin"
 func (s *server) adminOnly(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		authorized := os.Getenv("APP_ENV") == "admin" ||
-			os.Getenv("APP_ENV") == "test"
-
-		if !authorized {
-			s.respond(w, r, "Access forbidden", http.StatusForbidden)
+		if !s.isAdminMode() {
+			s.forbidden(w, r)
 			return
 		}
-
 		next(w, r)
 	}
 }
@@ -43,14 +39,10 @@ func (s *server) adminOnly(next http.HandlerFunc) http.HandlerFunc {
 // not set to "admin"
 func (s *server) adminOnlyMiddleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		authorized := os.Getenv("APP_ENV") == "admin" ||
-			os.Getenv("APP_ENV") == "test"
-
-		if !authorized {
-			s.respond(w, r, "Access forbidden", http.StatusForbidden)
+		if !s.isAdminMode() {
+			s.forbidden(w, r)
 			return
 		}
-
 		h.ServeHTTP(w, r)
 	})
 }
