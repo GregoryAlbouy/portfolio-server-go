@@ -164,6 +164,7 @@ func tokenFromUser(u *User) (string, error) {
 func (s *server) postMessage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		m := NewMessage()
+
 		if err := s.decodeRequest(r, m); err != nil {
 			clog.Printlb(err, clog.Red("DECODE ERROR"))
 			s.respond(w, r, err.Error(), http.StatusBadRequest)
@@ -177,13 +178,21 @@ func (s *server) postMessage() http.HandlerFunc {
 			return
 		}
 
-		if err := s.store.InsertMessage(m); err != nil {
-			clog.Printlb(err, clog.Red("INSERT ERROR"))
-			s.respond(w, r, "Internal error", http.StatusInternalServerError)
+		email := NewEmailFromMessage(m)
+		if err := email.Send(); err != nil {
+			clog.Printlb(err, clog.Red("EMAIL SENDING ERROR"))
+			fmt.Println(email)
+			s.respond(w, r, "Error sending the email", http.StatusInternalServerError)
 			return
 		}
 
-		clog.Printlb(m, clog.Green("MESSAGE POSTED"))
+		// // Database logics removed for now
+		// if err := s.store.InsertMessage(m); err != nil {
+		// 	clog.Printlb(err, clog.Red("INSERT ERROR"))
+		// 	s.respond(w, r, "Internal error", http.StatusInternalServerError)
+		// 	return
+		// }
+		fmt.Println(clog.Green("MESSAGE POSTED"))
 		s.respond(w, r, nil, http.StatusCreated)
 	}
 }
