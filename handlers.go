@@ -163,24 +163,27 @@ func tokenFromUser(u *User) (string, error) {
 
 func (s *server) postMessage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
 		m := NewMessage()
 		if err := s.decodeRequest(r, m); err != nil {
+			clog.Printlb(err, clog.Red("DECODE ERROR"))
 			s.respond(w, r, err.Error(), http.StatusBadRequest)
 			return
 		}
 		m.IP = utl.RequestIP(r)
 
 		if !m.Valid() {
+			clog.Printlb(m, clog.Red("MESSAGE VALIDATION ERROR"))
 			s.respond(w, r, "Invalid message", http.StatusBadRequest)
 			return
 		}
 
 		if err := s.store.InsertMessage(m); err != nil {
+			clog.Printlb(err, clog.Red("INSERT ERROR"))
 			s.respond(w, r, "Internal error", http.StatusInternalServerError)
 			return
 		}
 
+		clog.Printlb(m, clog.Green("MESSAGE POSTED"))
 		s.respond(w, r, nil, http.StatusCreated)
 	}
 }

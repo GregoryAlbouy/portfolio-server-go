@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -18,15 +17,17 @@ type server struct {
 func newServer() *server {
 	r := mux.NewRouter().StrictSlash(true)
 
-	r.Use(handlers.CORS(
-		handlers.AllowedHeaders([]string{"Content-Type"}),
-		handlers.AllowedOrigins([]string{"*"}),
-		handlers.AllowCredentials(),
-	))
+	// r.Use(handlers.CORS(
+	// 	handlers.AllowedHeaders([]string{"Content-Type"}),
+	// 	handlers.AllowedOrigins([]string{"*"}),
+	// 	handlers.AllowCredentials(),
+	// ))
 
 	s := &server{
 		router: r,
 	}
+
+	s.router.Use(corsMiddleware)
 
 	s.routes()
 	return s

@@ -7,7 +7,7 @@ const (
 	emailMaxLength   = 255
 	subjectMinLength = 0
 	subjectMaxLength = 255
-	messageMinLength = 1
+	messageMinLength = 3
 	messageMaxLength = 5000
 )
 

@@ -169,7 +169,7 @@ func (store *dbStore) UserExists(u *User) bool {
 }
 
 func (store *dbStore) GetMessageList() (ml []*Message, err error) {
-	err = store.db.Select(&ml, "SELECT * FROM message")
+	err = store.db.Select(&ml, "SELECT * FROM message ORDER BY date DESC")
 	return
 }
 

@@ -46,3 +46,15 @@ func (s *server) adminOnlyMiddleware(h http.Handler) http.Handler {
 		h.ServeHTTP(w, r)
 	})
 }
+
+// corsMiddleware sets basic cors to the response header.
+// Had to set it manually since I didn't manage to get the gorilla/mux handler
+// to work properly on non-GET routes.
+func corsMiddleware(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PATCH, PUT, DELETE")
+		w.Header().Set("Access-Control-Allow-Headers", "Accept, Accept-Language, Content-Type")
+		h.ServeHTTP(w, r)
+	})
+}
