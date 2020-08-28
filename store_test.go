@@ -7,6 +7,8 @@ type testStore struct {
 	projects []*Project
 	ucount   int64
 	users    []*User
+	mcount   int64
+	messages []*Message
 }
 
 func (t testStore) InsertProject(p *Project) error {
@@ -38,6 +40,19 @@ func (t testStore) GetProjectBySlug(slug string) (*Project, error) {
 	return nil, fmt.Errorf("Project %s not found", slug)
 }
 
+func (t testStore) Open() error {
+	return nil
+}
+func (t testStore) Close() error {
+	return nil
+}
+func (t testStore) Clear(table string) error {
+	return nil
+}
+func (t testStore) Drop(table string) error {
+	return nil
+}
+
 func (t testStore) UpdateProject(p *Project) error {
 	return nil
 }
@@ -45,12 +60,6 @@ func (t testStore) DeleteManyProjects(ids []int64) error {
 	return nil
 }
 func (t testStore) DeleteProject(id int64) error {
-	return nil
-}
-func (t testStore) Clear(table string) error {
-	return nil
-}
-func (t testStore) Drop(table string) error {
 	return nil
 }
 func (t testStore) InsertUser(u *User) error {
@@ -68,10 +77,15 @@ func (t testStore) GetUserList() ([]*User, error) {
 func (t testStore) UserExists(*User) bool {
 	return true
 }
-func (t testStore) Open() error {
+func (t testStore) GetMessageList() ([]*Message, error) {
+	return nil, nil
+}
+func (t testStore) InsertMessage(m *Message) error {
 	return nil
 }
-
-func (t testStore) Close() error {
+func (t testStore) DeleteMessageByID(id int64) error {
 	return nil
+}
+func (t testStore) DeleteMessagesByEmail(email string) (int64, error) {
+	return 0, nil
 }

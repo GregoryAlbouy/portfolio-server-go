@@ -21,11 +21,11 @@ func (s *server) routes() {
 
 	s.projectRoutes()
 	s.userRoutes()
-	// s.contactRoutes()
+	s.contactRoutes()
 }
 
 func (s *server) projectRoutes() {
-	subRouter := s.router.PathPrefix("/api/v1/projects").Subrouter()
+	subrouter := s.router.PathPrefix("/api/v1/projects").Subrouter()
 
 	routes := []routeConfig{
 		{path: "/", method: "GET", handler: s.getProjectList()},
@@ -35,12 +35,12 @@ func (s *server) projectRoutes() {
 		{path: "/{id}", method: "DELETE", handler: s.authOnly(s.deleteProject())},
 	}
 
-	s.serveRoutes(subRouter, routes)
+	s.serveRoutes(subrouter, routes)
 }
 
 func (s *server) userRoutes() {
-	subRouter := s.router.PathPrefix("/users").Subrouter()
-	subRouter.Use(s.adminOnlyMiddleware)
+	subrouter := s.router.PathPrefix("/users").Subrouter()
+	subrouter.Use(s.adminOnlyMiddleware)
 
 	routes := []routeConfig{
 		{path: "/", method: "POST", handler: s.createUser()},
@@ -49,27 +49,24 @@ func (s *server) userRoutes() {
 		{path: "/{id}", method: "DELETE", handler: s.deleteUser()},
 	}
 
-	s.serveRoutes(subRouter, routes)
+	s.serveRoutes(subrouter, routes)
 }
 
 // TODO: handlers
 func (s *server) contactRoutes() {
-	sub := s.router.PathPrefix("/contact").Subrouter()
+	subrouter := s.router.PathPrefix("/contact").Subrouter()
 
-	contactRoutes := []routeConfig{
-		{path: "/", method: "GET", handler: nil},
-		{path: "/", method: "POST", handler: nil},
-		{path: "/{id}", method: "GET", handler: nil},
-		{path: "/{id}", method: "DELETE", handler: nil},
+	routes := []routeConfig{
+		{path: "/", method: "GET", handler: s.authOnly(s.getMessageList())},
+		{path: "/", method: "POST", handler: s.postMessage()},
+		{path: "/{id}", method: "DELETE", handler: s.authOnly(s.deleteMessage())},
 	}
 
-	for _, r := range contactRoutes {
-		sub.HandleFunc(r.path, r.handler).Methods(r.method)
-	}
+	s.serveRoutes(subrouter, routes)
 }
 
 func (s *server) serveRoutes(router *mux.Router, routes []routeConfig) {
 	for _, r := range routes {
-		router.HandleFunc(r.path, r.handler).Methods(r.method)
+		router.HandleFunc(r.path, r.handler).Methods("OPTIONS", r.method)
 	}
 }

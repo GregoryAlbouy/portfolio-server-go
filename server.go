@@ -19,17 +19,17 @@ func newServer() *server {
 	r := mux.NewRouter().StrictSlash(true)
 
 	r.Use(handlers.CORS(
-		handlers.AllowedHeaders([]string{"content-type"}),
+		handlers.AllowedHeaders([]string{"Content-Type"}),
 		handlers.AllowedOrigins([]string{"*"}),
 		handlers.AllowCredentials(),
 	))
 
-	s := server{
+	s := &server{
 		router: r,
 	}
 
 	s.routes()
-	return &s
+	return s
 }
 
 func (s *server) attachStore(store *dbStore) *server {
@@ -57,8 +57,8 @@ func (s *server) forbidden(w http.ResponseWriter, r *http.Request) {
 	s.respond(w, r, "Access forbidden", http.StatusForbidden)
 }
 
-func (s *server) decode(w http.ResponseWriter, r *http.Request, v interface{}) error {
-	if err := json.NewDecoder(r.Body).Decode(v); err != nil {
+func (s *server) decodeRequest(r *http.Request, dst interface{}) error {
+	if err := json.NewDecoder(r.Body).Decode(dst); err != nil {
 		return fmt.Errorf("Cannot parse request body: %s", err)
 	}
 	return nil

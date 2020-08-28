@@ -14,6 +14,7 @@ import (
 var queries = map[string]string{
 	"table_project_create": "",
 	"table_user_create":    "",
+	"table_message_create": "",
 	"project_insert":       "",
 	"project_all":          "",
 	"project_ids":          "",
@@ -26,6 +27,7 @@ var queries = map[string]string{
 	"user_by_username":     "",
 	"user_delete":          "",
 	"user_insert":          "",
+	"message_insert":       "",
 }
 
 // Store interface
@@ -49,6 +51,11 @@ type Store interface {
 	GetUserByUsername(string) (*User, error)
 	DeleteUser(int64) error
 	UserExists(*User) bool
+
+	GetMessageList() ([]*Message, error)
+	InsertMessage(*Message) error
+	DeleteMessageByID(int64) error
+	DeleteMessagesByEmail(string) (int64, error)
 }
 
 type dbStore struct {
@@ -88,6 +95,7 @@ func (store *dbStore) Close() error {
 func (store *dbStore) createTables() {
 	store.db.MustExec(queries["table_project_create"])
 	store.db.MustExec(queries["table_user_create"])
+	store.db.MustExec(queries["table_message_create"])
 }
 
 func (store *dbStore) Clear(table string) error {
@@ -97,7 +105,6 @@ func (store *dbStore) Clear(table string) error {
 		return err
 	}
 	fmt.Printf("Table %s cleared\n", table)
-
 	return nil
 }
 
@@ -159,4 +166,33 @@ func (store *dbStore) DeleteUser(id int64) error {
 func (store *dbStore) UserExists(u *User) bool {
 	user, _ := store.GetUserByUsername(u.Username)
 	return user != nil
+}
+
+func (store *dbStore) GetMessageList() (ml []*Message, err error) {
+	err = store.db.Select(&ml, "SELECT * FROM message")
+	return
+}
+
+func (store *dbStore) InsertMessage(m *Message) error {
+	_, err := store.db.NamedExec(queries["message_insert"], m)
+	return err
+}
+
+func (store *dbStore) DeleteMessageByID(id int64) error {
+	_, err := store.db.Exec("DELETE FROM message WHERE id=?", id)
+	return err
+}
+
+func (store *dbStore) DeleteMessagesByEmail(email string) (int64, error) {
+	res, err := store.db.Exec("DELETE FROM message WHERE email=?", email)
+	if err != nil {
+		return 0, err
+	}
+
+	n, err := res.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return n, nil
 }

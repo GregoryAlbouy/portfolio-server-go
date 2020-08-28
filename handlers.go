@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"gregoryalbouy-server-go/clog"
+	"gregoryalbouy-server-go/utl"
 	"net/http"
 	"os"
 	"strconv"
@@ -52,7 +53,7 @@ func (s *server) createUser() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		u := &User{}
 
-		if err := s.decode(w, r, u); err != nil {
+		if err := s.decodeRequest(r, u); err != nil {
 			s.respond(w, r, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -104,7 +105,7 @@ func (s *server) createToken() http.HandlerFunc {
 		u := &User{}
 
 		// Check payload
-		if err := s.decode(w, r, u); err != nil {
+		if err := s.decodeRequest(r, u); err != nil {
 			s.respond(w, r, responseError{"Invalid payload"}, http.StatusBadRequest)
 			return
 		}
@@ -158,4 +159,65 @@ func tokenFromUser(u *User) (string, error) {
 	}
 
 	return tstr, nil
+}
+
+func (s *server) postMessage() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		m := NewMessage()
+		if err := s.decodeRequest(r, m); err != nil {
+			s.respond(w, r, err.Error(), http.StatusBadRequest)
+			return
+		}
+		m.IP = utl.RequestIP(r)
+
+		if !m.Valid() {
+			s.respond(w, r, "Invalid message", http.StatusBadRequest)
+			return
+		}
+
+		if err := s.store.InsertMessage(m); err != nil {
+			s.respond(w, r, "Internal error", http.StatusInternalServerError)
+			return
+		}
+
+		s.respond(w, r, nil, http.StatusCreated)
+	}
+}
+
+func (s *server) getMessageList() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ml, err := s.store.GetMessageList()
+		if err != nil {
+			s.respond(w, r, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		s.respond(w, r, ml, http.StatusOK)
+	}
+}
+
+func (s *server) deleteMessage() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		idstr := mux.Vars(r)["id"]
+		id, err := strconv.ParseInt(mux.Vars(r)["id"], 10, 64)
+
+		if err != nil {
+			// If id can't be parsed to int, treat it as an email
+			n, err := s.store.DeleteMessagesByEmail(idstr)
+			if err != nil {
+				s.respond(w, r, "Message could not be deleted", http.StatusInternalServerError)
+			}
+			s.respond(w, r, fmt.Sprintf("%d messages deleted", n), http.StatusOK)
+			return
+		}
+
+		if err := s.store.DeleteMessageByID(id); err != nil {
+			fmt.Println(err)
+			s.respond(w, r, fmt.Sprintf("Message with ID %d does not exist", id), http.StatusBadRequest)
+			return
+		}
+
+		s.respond(w, r, nil, http.StatusOK)
+	}
 }

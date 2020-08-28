@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS message
+(
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	ip TEXT,
+	email TEXT NOT NULL,
+	subject TEXT,
+	message TEXT NOT NULL,
+	date TEXT
+);
