@@ -8,6 +8,7 @@ It is functionnal and deployed on Google App Engine. I use it to access, store a
 
 - REST API providing CRUD operations on projects data
 - JWT authentication
+- Contact message handling
 - Tests using Go's built-in tools
 
 ## Storage
