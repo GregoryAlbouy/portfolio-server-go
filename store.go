@@ -8,7 +8,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 
-	"gregoryalbouy-server-go/clog"
+	"github.com/gregoryalbouy/portfolio-server-go/clog"
 )
 
 var queries = map[string]string{

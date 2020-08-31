@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"gregoryalbouy-server-go/clog"
 	"log"
 	"os"
+
+	"github.com/gregoryalbouy/portfolio-server-go/clog"
 )
 
 const (

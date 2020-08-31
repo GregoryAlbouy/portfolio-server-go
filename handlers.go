@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"gregoryalbouy-server-go/clog"
-	"gregoryalbouy-server-go/utl"
 	"net/http"
 	"os"
 	"strconv"
@@ -12,6 +10,9 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
 	"golang.org/x/crypto/bcrypt"
+
+	"github.com/gregoryalbouy/portfolio-server-go/clog"
+	"github.com/gregoryalbouy/portfolio-server-go/utl"
 )
 
 func (s *server) handleIndex() http.HandlerFunc {

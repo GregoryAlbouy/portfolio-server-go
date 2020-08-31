@@ -3,12 +3,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"gregoryalbouy-server-go/clog"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/gorilla/mux"
+
+	"github.com/gregoryalbouy/portfolio-server-go/clog"
 )
 
 type server struct {

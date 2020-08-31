@@ -3,9 +3,10 @@ package main
 import (
 	"errors"
 	"fmt"
-	"gregoryalbouy-server-go/clog"
 	"net/smtp"
 	"os"
+
+	"github.com/gregoryalbouy/portfolio-server-go/clog"
 )
 
 // Email represents an email

@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
-	"gregoryalbouy-server-go/clog"
-	"gregoryalbouy-server-go/utl"
 	"net/http"
 	"strconv"
 
 	"github.com/gorilla/mux"
+
+	"github.com/gregoryalbouy/portfolio-server-go/clog"
+	"github.com/gregoryalbouy/portfolio-server-go/utl"
 )
 
 func (s *server) getProjectList() http.HandlerFunc {
