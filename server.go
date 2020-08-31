@@ -3,15 +3,20 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"gregoryalbouy-server-go/clog"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gorilla/mux"
 )
 
 type server struct {
-	router *mux.Router
-	store  Store
+	addr    string
+	port    string
+	router  *mux.Router
+	store   Store
+	started time.Time
 }
 
 func newServer() *server {
@@ -24,12 +29,25 @@ func newServer() *server {
 	// ))
 
 	s := &server{
-		router: r,
+		started: time.Now(),
+		router:  r,
 	}
 
 	s.router.Use(corsMiddleware)
 
 	s.routes()
+	return s
+}
+
+func (s *server) setPortWithDefault(defaultPort string) *server {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = defaultPort
+	}
+	s.port = port
+	s.addr = ":" + port
+
+	fmt.Println("Port", clog.Blue(s.port))
 	return s
 }
 
@@ -68,4 +86,20 @@ func (s *server) decodeRequest(r *http.Request, dst interface{}) error {
 func (s *server) isAdminMode() bool {
 	env := os.Getenv("APP_ENV")
 	return env == "admin" || env == "dev"
+}
+
+func (s *server) serve() error {
+	errChan := make(chan error)
+	go func() {
+		if err := http.ListenAndServe(s.addr, s.router); err != nil {
+			errChan <- err
+		}
+	}()
+	s.printStatus()
+	err := <-errChan
+	return err
+}
+
+func (s *server) printStatus() {
+	fmt.Printf("%s (%s) http://127.0.0.1%s \n", clog.Green("Ready"), time.Since(s.started), s.addr)
 }

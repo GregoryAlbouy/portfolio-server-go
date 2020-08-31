@@ -166,21 +166,21 @@ func (s *server) postMessage() http.HandlerFunc {
 		m := NewMessage()
 
 		if err := s.decodeRequest(r, m); err != nil {
-			clog.Printlb(err, clog.Red("DECODE ERROR"))
+			clog.Errorlb(err, "decode error")
 			s.respond(w, r, err.Error(), http.StatusBadRequest)
 			return
 		}
 		m.IP = utl.RequestIP(r)
 
 		if !m.Valid() {
-			clog.Printlb(m, clog.Red("MESSAGE VALIDATION ERROR"))
+			clog.Errorlb(m, "contact validation error")
 			s.respond(w, r, "Invalid message", http.StatusBadRequest)
 			return
 		}
 
 		email := NewEmailFromMessage(m)
 		if err := email.Send(); err != nil {
-			clog.Printlb(err, clog.Red("EMAIL SENDING ERROR"))
+			clog.Errorlb(err, "email posting")
 			fmt.Println(email)
 			s.respond(w, r, "Error sending the email", http.StatusInternalServerError)
 			return
@@ -192,7 +192,7 @@ func (s *server) postMessage() http.HandlerFunc {
 		// 	s.respond(w, r, "Internal error", http.StatusInternalServerError)
 		// 	return
 		// }
-		fmt.Println(clog.Green("MESSAGE POSTED"))
+
 		s.respond(w, r, nil, http.StatusCreated)
 	}
 }
