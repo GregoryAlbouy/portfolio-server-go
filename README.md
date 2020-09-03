@@ -1,4 +1,6 @@
-# portfolio2020-server-go
+![Go Report Card](https://goreportcard.com/badge/github.com/gregoryalbouy/portfolio-server-go)
+
+# portfolio-server-go
 
 Backend-server for my portfolio https://gregoryalbouy.com written in Go + SQL (previously in Node.js + MongoDB)
 
